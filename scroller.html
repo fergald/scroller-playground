@@ -95,8 +95,8 @@
         // events. Why? It seems like redoing the heights causes
         // scroll events. Is the scroll-bar following the top of
         // bottomd or something?
-        console.log("lastPosition", lastPosition);
-        console.log("window.scrollY", window.scrollY);
+        log("lastPosition", lastPosition);
+        log("scroller.scrollY", scroller.scrollY);
         if (lastPosition == window.scrollY) {
           return;
         }
