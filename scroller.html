@@ -56,7 +56,7 @@
         // How many items can we fit in the window?
         var itemsPer = Math.ceil(scroller.clientHeight / config.itemHeight);
         log("itemsPer", itemsPer);
-        var firstVisibleItem = Math.min(config.items - itemsPer,
+        var firstVisibleItem = Math.min(config.items - 1 - itemsPer,
                                         Math.floor(scrollPos / config.itemHeight));
 
         // Can render more items above the first visible one.
@@ -65,7 +65,7 @@
 
         var lastVisibleItem = firstVisibleItem + itemsPer;
         // Can render more items below the last visible one.
-        var lastItem = Math.min(config.items, lastVisibleItem + config.postFill * itemsPer);
+        var lastItem = Math.min(config.items - 1, lastVisibleItem + config.postFill * itemsPer);
         log("lastItem", lastItem);
 
         var renderedItems = lastItem - firstItem + 1;
