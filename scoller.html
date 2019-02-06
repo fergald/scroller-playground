@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <style>
+      item { height: 100px }
+    </style>
+    
+  </head>
+  <body>
+    <div id=scroller style="height: 100000px">
+      <div id=topd style="bgcolor: black"></div>
+      <div id=contentd></div>
+      <div id=bottomd></div>
+    </div>
+    <script>
+      const items = 1000;
+      const itemHeight = 100;
+      const totalHeight = itemHeight * items;
+
+      function sleep(miliseconds) {
+        var currentTime = new Date().getTime();
+
+        while (currentTime + miliseconds >= new Date().getTime()) {
+        }
+      }
+
+      function setHeight(e, h) {
+        e.style.height = h;
+      }
+      
+      function createItem(n) {
+        var item = document.createElement("div");
+        item.className = "item"
+        item.innerText = "item " + n;
+        setHeight(item, itemHeight);
+        return item;
+      }
+
+      let topItem = 0;
+      let bottomItem = 0;
+
+      function log(...m) {
+        if (true) {
+          console.log(...m);
+        }
+      }
+
+      // Redraw the visible items after a scroll.
+      function moveScroll(scrollPos) {
+        log(scrollPos);
+        // How many items can we fit in the window?
+        var itemsPer = Math.ceil(window.innerHeight / itemHeight);
+        log("itemsPer", itemsPer);
+        var firstVisibleItem = Math.min(items - itemsPer,
+                                        Math.floor(scrollPos / itemHeight));
+
+        // Could render more items above the first visible one.
+        var firstItem = firstVisibleItem;
+        log("firstItem", firstItem);
+
+        var lastVisibleItem = firstVisibleItem + itemsPer;
+        // Could render more items below the last visible one.
+        var lastItem = lastVisibleItem;
+        log("lastItem", lastItem);
+
+        // Replace the old items.
+        contentd.innerHTML = "";
+        for (var i = firstItem; i <= lastItem; i++) {
+          contentd.appendChild(createItem(i));
+        }
+
+        // Now set heights on the spacers.
+        var topHeight = itemHeight * firstItem;
+        setHeight(topd, topHeight);
+        log("topHeight", topHeight);
+        var contentHeight = itemHeight * itemsPer;
+        setHeight(contentd, contentHeight);
+        var bottomHeight = totalHeight - topHeight - contentHeight;
+        setHeight(bottomd, bottomHeight);
+        log("bottomHeight", bottomHeight);
+//        sleep(5);
+      }
+
+      // Only generate 1 redraw per frame.
+      let lastPosition = 0;
+      let ticking = false;
+      window.addEventListener('scroll', function(e) {
+        // BUG: If scroll down, we generate more and more scroll down
+        // events. Why? It seems like redoing the heights causes
+        // scroll events. Is the scroll-bar following the top of
+        // bottomd or something?
+        console.log("lastPosition", lastPosition);
+        console.log("window.scrollY", window.scrollY);
+        if (lastPosition == window.scrollY) {
+          return;
+        }
+        lastPosition = window.scrollY;
+
+        if (!ticking) {
+          window.requestAnimationFrame(function() {
+            /*
+            log(topd.getBoundingClientRect());
+            log(contentd.getBoundingClientRect());
+            log(bottomd.getBoundingClientRect());
+            log(topd.getBoundingClientRect().height +
+                contentd.getBoundingClientRect().height +
+                bottomd.getBoundingClientRect().height);
+            log(document.body.getBoundingClientRect());
+*/
+            moveScroll(lastPosition);
+            ticking = false;
+          });
+
+          ticking = true;
+        }
+      });
+      moveScroll(0);
+    </script>
+    
+  </body>  
+</html>
