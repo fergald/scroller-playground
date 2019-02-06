@@ -98,6 +98,11 @@
         if (lastPosition == window.scrollY) {
           return;
         }
+
+        if (window.scrollY >
+            document.body.getBoundingClientRect().height - window.innerHeight) {
+          return;
+        }
         lastPosition = window.scrollY;
 
         if (!ticking) {
