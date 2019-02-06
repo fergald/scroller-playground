@@ -54,7 +54,7 @@
       function moveScroll(scrollPos) {
         log("scrollPos", scrollPos);
         // How many items can we fit in the window?
-        var itemsPer = Math.ceil(window.innerHeight / config.itemHeight);
+        var itemsPer = Math.ceil(scroller.clientHeight / config.itemHeight);
         log("itemsPer", itemsPer);
         var firstVisibleItem = Math.min(config.items - itemsPer,
                                         Math.floor(scrollPos / config.itemHeight));
@@ -90,22 +90,18 @@
       // Only generate 1 redraw per frame.
       let lastPosition = 0;
       let ticking = false;
-      window.addEventListener('scroll', function(e) {
+      scroller.addEventListener('scroll', function(e) {
         // BUG: If scroll down, we generate more and more scroll down
         // events. Why? It seems like redoing the heights causes
         // scroll events. Is the scroll-bar following the top of
         // bottomd or something?
         log("lastPosition", lastPosition);
-        log("scroller.scrollY", scroller.scrollY);
-        if (lastPosition == window.scrollY) {
+        log("scroller.scrollTop", scroller.scrollTop);
+        if (lastPosition == scroller.scrollTop) {
           return;
         }
 
-        if (window.scrollY >
-            document.body.getBoundingClientRect().height - window.innerHeight) {
-          return;
-        }
-        lastPosition = window.scrollY;
+        lastPosition = scroller.scrollTop;
 
         if (!ticking) {
           window.requestAnimationFrame(function() {
@@ -116,7 +112,7 @@
             log(topd.getBoundingClientRect().height +
                 contentd.getBoundingClientRect().height +
                 bottomd.getBoundingClientRect().height);
-            log(document.body.getBoundingClientRect());
+            log(scroller.getBoundingClientRect());
 */
             moveScroll(lastPosition);
             ticking = false;
