@@ -6,19 +6,21 @@
     
   </head>
   <body>
-    <div id=scroller style="height: 100000px">
+    <div id=scroller style="overflow: scroll; height: 100%">
       <div id=topd style="bgcolor: black"></div>
       <div id=contentd></div>
       <div id=bottomd></div>
     </div>
     <script>
-      const items = 1000;
-      const itemHeight = 100;
-      const totalHeight = itemHeight * items;
+      var config = new Object();
+      config.items = 1000;
+      config.itemHeight = 100;
+      totalHeight = config.itemHeight * config.items;
       // How many screens of content to pre-/post-fill.
-      const preFill = 0;
-      const postFill = 0;
-      const sleepMs = 0;
+      config.preFill = 0;
+      config.postFill = 0;
+      config.sleepMs = 0;
+      config.log = false;
 
       function sleep(miliseconds) {
         var currentTime = new Date().getTime();
@@ -35,7 +37,7 @@
         var item = document.createElement("div");
         item.className = "item"
         item.innerText = "item " + n;
-        setHeight(item, itemHeight);
+        setHeight(item, config.itemHeight);
         return item;
       }
 
@@ -43,7 +45,7 @@
       let bottomItem = 0;
 
       function log(...m) {
-        if (true) {
+        if (config.log) {
           console.log(...m);
         }
       }
@@ -52,18 +54,18 @@
       function moveScroll(scrollPos) {
         log("scrollPos", scrollPos);
         // How many items can we fit in the window?
-        var itemsPer = Math.ceil(window.innerHeight / itemHeight);
+        var itemsPer = Math.ceil(window.innerHeight / config.itemHeight);
         log("itemsPer", itemsPer);
-        var firstVisibleItem = Math.min(items - itemsPer,
-                                        Math.floor(scrollPos / itemHeight));
+        var firstVisibleItem = Math.min(config.items - itemsPer,
+                                        Math.floor(scrollPos / config.itemHeight));
 
         // Can render more items above the first visible one.
-        var firstItem = Math.max(0, firstVisibleItem - preFill * itemsPer);
+        var firstItem = Math.max(0, firstVisibleItem - config.preFill * itemsPer);
         log("firstItem", firstItem);
 
         var lastVisibleItem = firstVisibleItem + itemsPer;
         // Can render more items below the last visible one.
-        var lastItem = Math.min(items, lastVisibleItem + postFill * itemsPer);
+        var lastItem = Math.min(config.items, lastVisibleItem + config.postFill * itemsPer);
         log("lastItem", lastItem);
 
         var renderedItems = lastItem - firstItem + 1;
@@ -74,15 +76,15 @@
         }
 
         // Now set heights on the spacers.
-        var topHeight = itemHeight * firstItem;
+        var topHeight = config.itemHeight * firstItem;
         setHeight(topd, topHeight);
         log("topHeight", topHeight);
-        var contentHeight = itemHeight * renderedItems;
+        var contentHeight = config.itemHeight * renderedItems;
         setHeight(contentd, contentHeight);
         var bottomHeight = totalHeight - topHeight - contentHeight;
         setHeight(bottomd, bottomHeight);
         log("bottomHeight", bottomHeight);
-        sleep(sleepMs);
+        sleep(config.sleepMs);
       }
 
       // Only generate 1 redraw per frame.
