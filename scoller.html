@@ -46,7 +46,7 @@
 
       // Redraw the visible items after a scroll.
       function moveScroll(scrollPos) {
-        log(scrollPos);
+        log("scrollPos", scrollPos);
         // How many items can we fit in the window?
         var itemsPer = Math.ceil(window.innerHeight / itemHeight);
         log("itemsPer", itemsPer);
