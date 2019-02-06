@@ -18,6 +18,8 @@
       // How many screens of content to pre-/post-fill.
       const preFill = 0;
       const postFill = 0;
+      const sleepMs = 0;
+
       function sleep(miliseconds) {
         var currentTime = new Date().getTime();
 
@@ -80,7 +82,7 @@
         var bottomHeight = totalHeight - topHeight - contentHeight;
         setHeight(bottomd, bottomHeight);
         log("bottomHeight", bottomHeight);
-//        sleep(5);
+        sleep(sleepMs);
       }
 
       // Only generate 1 redraw per frame.
