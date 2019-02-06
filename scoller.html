@@ -15,7 +15,9 @@
       const items = 1000;
       const itemHeight = 100;
       const totalHeight = itemHeight * items;
-
+      // How many screens of content to pre-/post-fill.
+      const preFill = 0;
+      const postFill = 0;
       function sleep(miliseconds) {
         var currentTime = new Date().getTime();
 
@@ -53,15 +55,16 @@
         var firstVisibleItem = Math.min(items - itemsPer,
                                         Math.floor(scrollPos / itemHeight));
 
-        // Could render more items above the first visible one.
-        var firstItem = firstVisibleItem;
+        // Can render more items above the first visible one.
+        var firstItem = Math.max(0, firstVisibleItem - preFill * itemsPer);
         log("firstItem", firstItem);
 
         var lastVisibleItem = firstVisibleItem + itemsPer;
-        // Could render more items below the last visible one.
-        var lastItem = lastVisibleItem;
+        // Can render more items below the last visible one.
+        var lastItem = Math.min(items, lastVisibleItem + postFill * itemsPer);
         log("lastItem", lastItem);
 
+        var renderedItems = lastItem - firstItem + 1;
         // Replace the old items.
         contentd.innerHTML = "";
         for (var i = firstItem; i <= lastItem; i++) {
@@ -72,7 +75,7 @@
         var topHeight = itemHeight * firstItem;
         setHeight(topd, topHeight);
         log("topHeight", topHeight);
-        var contentHeight = itemHeight * itemsPer;
+        var contentHeight = itemHeight * renderedItems;
         setHeight(contentd, contentHeight);
         var bottomHeight = totalHeight - topHeight - contentHeight;
         setHeight(bottomd, bottomHeight);
