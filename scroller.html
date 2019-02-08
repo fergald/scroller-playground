@@ -16,9 +16,8 @@
       <input type=submit onclick="reconfigure()">
     </div>
     <div id=scroller style="overflow: scroll; height: 100%; float: right; width: 50%">
-      <div id=topd style="bgcolor: black"></div>
-      <div id=contentd></div>
-      <div id=bottomd></div>
+      <div id=scrollerInner>
+      </div>
     </div>
     <script>
       var config;
@@ -80,6 +79,26 @@
         return [firstItem, lastItem];
       }
 
+      function appendSpaceAndItems(config, skipItems, firstItem, numItems) {
+        var spacerDiv = document.createElement("div");
+        var spacerHeight = skipItems * config.itemHeight;
+        setHeight(spacerDiv, spacerHeight);
+        log("spacerHeight", spacerHeight);
+        scrollerInner.appendChild(spacerDiv);
+
+        var itemsDiv = document.createElement("div");
+        lastItem = firstItem + numItems - 1;
+        for (var i = firstItem; i <= lastItem; i++) {
+          itemsDiv.appendChild(createItem(i));
+        }
+        var itemsHeight = config.itemHeight * numItems;
+        setHeight(itemsDiv, itemsHeight);
+        log("itemsDiv height", itemsHeight);
+        scrollerInner.appendChild(itemsDiv);
+
+        return spacerHeight + itemsHeight;
+      }
+
       // Redraw the visible items after a scroll.
       function moveScroll(scrollPos) {
         let totalHeight = config.itemHeight * config.items;
@@ -87,23 +106,19 @@
 
         // Can render more items above the first visible one.
         var [firstItem, lastItem] = getFirstLastItem(config, scrollPos);
+        var numItems = lastItem - firstItem + 1;
 
-        var renderedItems = lastItem - firstItem + 1;
-        // Replace the old items.
-        contentd.innerHTML = "";
-        for (var i = firstItem; i <= lastItem; i++) {
-          contentd.appendChild(createItem(i));
+        // Remove all contents.
+        scrollerInner.innerHTML = "";
+        var usedHeight = appendSpaceAndItems(config, firstItem, firstItem, numItems);
+        log("usedHeight", usedHeight);
+
+        var remainingItems = config.items - lastItem - 1;
+        usedHeight += appendSpaceAndItems(config, remainingItems, 0, 0);
+        log("usedHeight", usedHeight);
+        if (usedHeight != totalHeight) {
+          console.error("usedHeight != totalHeight", usedHeight, totalHeight);
         }
-
-        // Now set heights on the spacers.
-        var topHeight = config.itemHeight * firstItem;
-        setHeight(topd, topHeight);
-        log("topHeight", topHeight);
-        var contentHeight = config.itemHeight * renderedItems;
-        setHeight(contentd, contentHeight);
-        var bottomHeight = totalHeight - topHeight - contentHeight;
-        setHeight(bottomd, bottomHeight);
-        log("bottomHeight", bottomHeight);
         sleep(config.sleepMs);
       }
 
