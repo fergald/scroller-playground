@@ -19,6 +19,7 @@
       <div id=scrollerInner>
       </div>
     </div>
+    <div id=delayedScroller style="width: 10%; height: 100%; overflow: scroll; float: right"><div id=innerSpace></div></div>
     <script>
       var config;
       function reconfigure() {
@@ -32,6 +33,8 @@
         config.log = logi.checked;
         moveScroll(0);
         scroller.scrollTop = 0;
+        innerSpace.style.height = scrollerInner.getBoundingClientRect().height;
+        log("innerSpace.style.height", innerSpace.style.height);
       }
       function sleep(ms) {
         var limit = new Date().getTime() + ms;
@@ -122,7 +125,59 @@
         sleep(config.sleepMs);
       }
 
-      function installListener() {
+      function getRanges(beforePos, afterPos) {
+        let pos1, pos2;
+        if (beforePos < afterPos) {
+          pos1 = beforePos;
+          pos2 = afterPos;
+        } else {
+          pos1 = afterPos;
+          pos2 = beforePos;
+        }
+        var toDraw = [];
+        let [pos1f, pos1l] = getFirstLastItem(config, pos1);
+        let [pos2f, pos2l] = getFirstLastItem(config, pos2);
+        if (pos1l >= pos2f) {
+          toDraw.push([pos1f, pos2l]);
+        } else {
+          toDraw.push([pos1f, pos1l]);
+          toDraw.push([pos2f, pos2l]);
+        }
+        return toDraw;
+      }
+      // Redraw the visible and about to be visible items.
+      function drawItems(beforePos, afterPos) {
+        scrollerInner.innerHTML = "";
+        var toDraw = getRanges(beforePos, afterPos);
+        log("toDraw", toDraw);
+        var usedHeight = 0;
+        var lastItem = -1;
+        for (var i in toDraw) {
+          var [posf, posl] = toDraw[i];
+          log("drawing from: ", posf, posl);
+          var numItems = posl - posf + 1;
+          log("numItems", numItems);
+          var skipItems = posf - lastItem - 1;
+          log("skipItems", skipItems);
+          usedHeight += appendSpaceAndItems(config, skipItems, posf, numItems);
+          log("usedHeight", usedHeight);
+          lastItem = posl;
+        }
+
+        log("padding from: ", lastItem);
+        var remainingItems = config.items - lastItem - 1;
+        usedHeight += appendSpaceAndItems(config, remainingItems, 0, 0);
+        log("usedHeight", usedHeight);
+        let totalHeight = config.itemHeight * config.items;
+        if (usedHeight != totalHeight) {
+          console.error("usedHeight != totalHeight", usedHeight, totalHeight);
+          console.error(beforePos, afterPos);
+        }
+        sleep(config.sleepMs);
+      }
+
+      // The scroller directly attached to the content div.
+      function installSimpleListener() {
         // Only generate 1 redraw per frame.
         let lastPosition = 0;
         let ticking = false;
@@ -158,7 +213,41 @@
           }
         });
       }
-      installListener();
+
+      // The scroller indirectly attached and controlling the content div.
+      function installFrameDropListener() {
+        let futureScroll = null;
+        let nextScroll = null;
+        let ticking = false;
+        delayedScroller.addEventListener('scroll', function(e) {
+          log("scroller.scrollTop", scroller.scrollTop);
+          futureScroll = delayedScroller.scrollTop;
+
+          let render = function () {
+            log("futureScroll", futureScroll);
+            log("nextScroll", nextScroll);
+            if (nextScroll != null) {
+              var p1 = nextScroll;
+              var p2 = futureScroll != null ? futureScroll : nextScroll;
+              drawItems(p1, p2);
+              scroller.scrollTop = nextScroll;
+            }
+            nextScroll = futureScroll;
+            futureScroll = null;
+            // Make sure the last scroll is handled.
+            if (nextScroll != null) {
+              window.requestAnimationFrame(render);
+            }
+            ticking = false;
+          }
+          if (!ticking) {
+            window.requestAnimationFrame(render);
+            ticking = true;
+          }
+        });
+      }
+      installSimpleListener();
+      installFrameDropListener();
       reconfigure();
     </script>
     
