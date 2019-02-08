@@ -122,40 +122,43 @@
         sleep(config.sleepMs);
       }
 
-      // Only generate 1 redraw per frame.
-      let lastPosition = 0;
-      let ticking = false;
-      scroller.addEventListener('scroll', function(e) {
-        // BUG: If scroll down, we generate more and more scroll down
-        // events. Why? It seems like redoing the heights causes
-        // scroll events. Is the scroll-bar following the top of
-        // bottomd or something?
-        log("lastPosition", lastPosition);
-        log("scroller.scrollTop", scroller.scrollTop);
-        if (lastPosition == scroller.scrollTop) {
-          return;
-        }
+      function installListener() {
+        // Only generate 1 redraw per frame.
+        let lastPosition = 0;
+        let ticking = false;
+        scroller.addEventListener('scroll', function(e) {
+          // BUG: If scroll down, we generate more and more scroll down
+          // events. Why? It seems like redoing the heights causes
+          // scroll events. Is the scroll-bar following the top of
+          // bottomd or something?
+          log("lastPosition", lastPosition);
+          log("scroller.scrollTop", scroller.scrollTop);
+          if (lastPosition == scroller.scrollTop) {
+            return;
+          }
 
-        lastPosition = scroller.scrollTop;
+          lastPosition = scroller.scrollTop;
 
-        if (!ticking) {
-          window.requestAnimationFrame(function() {
-            /*
-            log(topd.getBoundingClientRect());
-            log(contentd.getBoundingClientRect());
-            log(bottomd.getBoundingClientRect());
-            log(topd.getBoundingClientRect().height +
-                contentd.getBoundingClientRect().height +
-                bottomd.getBoundingClientRect().height);
-            log(scroller.getBoundingClientRect());
-*/
-            moveScroll(lastPosition);
-            ticking = false;
-          });
+          if (!ticking) {
+            window.requestAnimationFrame(function() {
+              /*
+               log(topd.getBoundingClientRect());
+               log(contentd.getBoundingClientRect());
+               log(bottomd.getBoundingClientRect());
+               log(topd.getBoundingClientRect().height +
+               contentd.getBoundingClientRect().height +
+               bottomd.getBoundingClientRect().height);
+               log(scroller.getBoundingClientRect());
+              */
+              moveScroll(lastPosition);
+              ticking = false;
+            });
 
-          ticking = true;
-        }
-      });
+            ticking = true;
+          }
+        });
+      }
+      installListener();
       reconfigure();
     </script>
     
