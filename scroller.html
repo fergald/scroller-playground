@@ -62,10 +62,7 @@
         }
       }
 
-      // Redraw the visible items after a scroll.
-      function moveScroll(scrollPos) {
-        totalHeight = config.itemHeight * config.items;
-        log("scrollPos", scrollPos);
+      function getFirstLastItem(config, scrollPos) {
         // How many items can we fit in the window?
         var itemsPer = Math.ceil(scroller.clientHeight / config.itemHeight);
         log("itemsPer", itemsPer);
@@ -80,6 +77,16 @@
         // Can render more items below the last visible one.
         var lastItem = Math.min(config.items - 1, lastVisibleItem + config.postFill * itemsPer);
         log("lastItem", lastItem);
+        return [firstItem, lastItem];
+      }
+
+      // Redraw the visible items after a scroll.
+      function moveScroll(scrollPos) {
+        let totalHeight = config.itemHeight * config.items;
+        log("scrollPos", scrollPos);
+
+        // Can render more items above the first visible one.
+        var [firstItem, lastItem] = getFirstLastItem(config, scrollPos);
 
         var renderedItems = lastItem - firstItem + 1;
         // Replace the old items.
